@@ -2,9 +2,13 @@
 import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
+import Groq from "groq-sdk";
+
+const groq = new Groq();
 
 export default function Home() {
   const [input, setInput] = useState("");
+  const [previousInput, setPreviousInput] = useState("");
   const [selectedPreset, setSelectedPreset] = useState("SD1.5");
   const [isEnhancing, setIsEnhancing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -12,31 +16,37 @@ export default function Home() {
   const enhancePrompt = async () => {
     if (!input.trim()) return;
     setIsEnhancing(true);
+    setPreviousInput(input);
+    setInput("");
 
     try {
-      const response = await fetch("/api/enhance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: input, preset: selectedPreset }),
+      const stream = await groq.chat.completions.create({
+        messages: [
+          { role: "system", content: presets[selectedPreset as keyof typeof presets] },
+          { role: "user", content: input },
+        ],
+        model: "llama3-8b-8192",
+        temperature: 0.5,
+        max_tokens: 1024,
+        top_p: 1,
+        stream: true,
       });
 
-      if (!response.ok) throw new Error("Failed to get response");
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader!.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        setInput((prev) => prev + chunk);
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || "";
+        setInput((prev) => prev + content);
       }
     } catch (error) {
       console.error("Error:", error);
-      setInput((prev) => prev + "\n\nSorry, I encountered an error.");
+      setInput("Sorry, I encountered an error.");
     } finally {
       setIsEnhancing(false);
     }
+  };
+
+  const undoEnhancement = () => {
+    setInput(previousInput);
+    setPreviousInput("");
   };
 
   useEffect(() => {
@@ -71,9 +81,14 @@ export default function Home() {
                 minRows={5}
                 autosize
               />
-              <Button onClick={enhancePrompt} loading={isEnhancing} fullWidth>
-                {isEnhancing ? "Enhancing..." : "Enhance"}
-              </Button>
+              <Stack direction="row" spacing="xs">
+                <Button onClick={enhancePrompt} loading={isEnhancing} fullWidth>
+                  {isEnhancing ? "Enhancing..." : "Enhance"}
+                </Button>
+                <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline">
+                  Undo
+                </Button>
+              </Stack>
             </Stack>
           </Paper>
         </Center>
