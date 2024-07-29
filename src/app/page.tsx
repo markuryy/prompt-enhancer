@@ -1,11 +1,11 @@
 "use client";
-import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container, Text, Modal, TextInput, Tooltip, Group, ActionIcon } from "@mantine/core";
+import { Box, Title, Stack, Textarea, Button, Paper, Center, Container, Text, Modal, TextInput, Tooltip, Group, ActionIcon, Header } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
 import Groq from "groq-sdk";
 import { ErrorBoundary } from "react-error-boundary";
 import { useApiKey } from "@/utils/apiKeyManager";
-import { TbHorse, TbArrowBack, TbSettings } from "react-icons/tb";
+import { TbHorse, TbArrowBack, TbSettings, TbChevronDown } from "react-icons/tb";
 import { LuSparkles } from "react-icons/lu";
 
 function ErrorFallback({error}: {error: Error}) {
@@ -29,6 +29,8 @@ export default function Home() {
   const { apiKey, saveApiKey, removeApiKey } = useApiKey();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isScore9Active, setIsScore9Active] = useState(false);
+  const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
+  const [customPreset, setCustomPreset] = useState("");
 
   useEffect(() => {
     if (!apiKey) {
@@ -60,7 +62,7 @@ export default function Home() {
       const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
       const stream = await groq.chat.completions.create({
         messages: [
-          { role: "system", content: presets[selectedPreset as keyof typeof presets] },
+          { role: "system", content: selectedPreset === "Custom" ? customPreset : presets[selectedPreset as keyof typeof presets] },
           { role: "user", content: input },
         ],
         model: "llama3-8b-8192",
@@ -102,25 +104,24 @@ export default function Home() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Container size="md">
-        <Stack align="stretch" justify="center" h="100vh" fw="md">
-          <Group justify="space-between" align="center">
-            <Box ta="center" style={{ flex: 1 }}>
-              <Title order={1}>AI Prompt Enhancer</Title>
-            </Box>
+        <Header height={60} p="xs">
+          <Group justify="space-between" style={{ height: '100%' }}>
+            <Title order={3}>AI Prompt Enhancer</Title>
             <Tooltip label="Settings">
-              <ActionIcon onClick={() => setIsSettingsOpen(true)} variant="outline" size="lg">
-                <TbSettings />
+              <ActionIcon onClick={() => setIsSettingsOpen(true)} variant="subtle">
+                <TbSettings size="1.2rem" />
               </ActionIcon>
             </Tooltip>
           </Group>
-          
-          <Select
-            label="Select Preset"
-            data={Object.keys(presets).map(key => ({ value: key, label: key }))}
-            value={selectedPreset}
-            onChange={(value) => setSelectedPreset(value as string)}
-            style={{ maxWidth: "600px", margin: "0 auto" }}
-          />
+        </Header>
+        
+        <Stack align="stretch" justify="center" h="calc(100vh - 60px)" fw="md">
+          <Group justify="center" align="center">
+            <Text>Optimize prompt for</Text>
+            <Button onClick={() => setIsPresetModalOpen(true)} rightSection={<TbChevronDown />} variant="subtle">
+              {selectedPreset}
+            </Button>
+          </Group>
           
           <Center>
             <Paper withBorder p="md" style={{ width: "100%", maxWidth: "800px" }}>
@@ -135,14 +136,12 @@ export default function Home() {
                   autosize
                 />
                 <Group justify="center">
-                  
-                  
                   <Tooltip label="Toggle Score 9">
                     <Button onClick={toggleScore9} variant={isScore9Active ? "filled" : "outline"}>
                       <TbHorse />
                     </Button>
                   </Tooltip>
-                  <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey} leftSection={<LuSparkles />}>
+                  <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey} leftSection={<LuSparkles />} size="lg">
                     Enhance
                   </Button>
                   <Tooltip label="Undo">
@@ -179,6 +178,41 @@ export default function Home() {
           }}>
             Remove API Key
           </Button>
+        </Stack>
+      </Modal>
+
+      <Modal opened={isPresetModalOpen} onClose={() => setIsPresetModalOpen(false)} title="Select Preset">
+        <Stack>
+          {Object.keys(presets).map(key => (
+            <Button
+              key={key}
+              onClick={() => {
+                setSelectedPreset(key);
+                setIsPresetModalOpen(false);
+              }}
+              variant={selectedPreset === key ? "filled" : "light"}
+            >
+              {key}
+            </Button>
+          ))}
+          <Button
+            onClick={() => {
+              setSelectedPreset("Custom");
+              setIsPresetModalOpen(false);
+            }}
+            variant={selectedPreset === "Custom" ? "filled" : "light"}
+          >
+            Custom
+          </Button>
+          {selectedPreset === "Custom" && (
+            <Textarea
+              label="Custom Preset"
+              value={customPreset}
+              onChange={(e) => setCustomPreset(e.currentTarget.value)}
+              minRows={5}
+              placeholder="Enter your custom system prompt here..."
+            />
+          )}
         </Stack>
       </Modal>
     </ErrorBoundary>
