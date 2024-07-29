@@ -1,11 +1,11 @@
 "use client";
-import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container, Text, Modal, TextInput, Tooltip, Group } from "@mantine/core";
+import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container, Text, Modal, TextInput, Tooltip, Group, ActionIcon } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
 import Groq from "groq-sdk";
 import { ErrorBoundary } from "react-error-boundary";
 import { useApiKey } from "@/utils/apiKeyManager";
-import { TbHorse, TbStars, TbArrowBack, TbSettings } from "react-icons/tb";
+import { TbHorse, TbArrowBack, TbSettings } from "react-icons/tb";
 import { LuSparkles } from "react-icons/lu";
 
 function ErrorFallback({error}: {error: Error}) {
@@ -101,9 +101,16 @@ export default function Home() {
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Container size="md">
         <Stack align="stretch" justify="center" h="100vh" fw="md">
-          <Box ta="center">
-            <Title order={1}>AI Prompt Enhancer</Title>
-          </Box>
+          <Group justify="space-between" align="center">
+            <Box ta="center" style={{ flex: 1 }}>
+              <Title order={1}>AI Prompt Enhancer</Title>
+            </Box>
+            <Tooltip label="Settings">
+              <ActionIcon onClick={() => setIsSettingsOpen(true)} variant="outline" size="lg">
+                <TbSettings />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
           
           <Select
             label="Select Preset"
@@ -126,28 +133,16 @@ export default function Home() {
                   autosize
                 />
                 <Group justify="center">
-                  <Tooltip label="Enhance">
-                    <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey}>
-                      <LuSparkles />
-                    </Button>
-                  </Tooltip>
+                  <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey} size="lg" leftSection={<LuSparkles />}>
+                    Enhance
+                  </Button>
                   <Tooltip label="Undo">
                     <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline">
                       <TbArrowBack />
                     </Button>
                   </Tooltip>
-                  <Tooltip label="Settings">
-                    <Button onClick={() => setIsSettingsOpen(true)} variant="outline">
-                      <TbSettings />
-                    </Button>
-                  </Tooltip>
                   <Tooltip label="Toggle Score 9">
                     <Button onClick={toggleScore9} variant={isScore9Active ? "filled" : "outline"}>
-                      <TbStars />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip label="Pony">
-                    <Button variant="outline">
                       <TbHorse />
                     </Button>
                   </Tooltip>
