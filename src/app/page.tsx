@@ -40,7 +40,7 @@ export default function Home() {
     setInput("");
 
     try {
-      const groq = new Groq({ apiKey });
+      const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
       const stream = await groq.chat.completions.create({
         messages: [
           { role: "system", content: presets[selectedPreset as keyof typeof presets] },
