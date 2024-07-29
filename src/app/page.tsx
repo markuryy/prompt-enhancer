@@ -1,11 +1,10 @@
 "use client";
-import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container, Text } from "@mantine/core";
+import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container, Text, Modal, TextInput } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
 import Groq from "groq-sdk";
 import { ErrorBoundary } from "react-error-boundary";
-
-const groq = new Groq();
+import { useApiKey } from "@/utils/apiKeyManager";
 
 function ErrorFallback({error}: {error: Error}) {
   return (
@@ -23,14 +22,25 @@ export default function Home() {
   const [selectedPreset, setSelectedPreset] = useState("SD1.5");
   const [isEnhancing, setIsEnhancing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState("");
+  const { apiKey, saveApiKey, removeApiKey } = useApiKey();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!apiKey) {
+      setIsApiKeyModalOpen(true);
+    }
+  }, [apiKey]);
 
   const enhancePrompt = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !apiKey) return;
     setIsEnhancing(true);
     setPreviousInput(input);
     setInput("");
 
     try {
+      const groq = new Groq({ apiKey });
       const stream = await groq.chat.completions.create({
         messages: [
           { role: "system", content: presets[selectedPreset as keyof typeof presets] },
@@ -58,6 +68,11 @@ export default function Home() {
   const undoEnhancement = () => {
     setInput(previousInput);
     setPreviousInput("");
+  };
+
+  const handleSaveApiKey = () => {
+    saveApiKey(tempApiKey);
+    setIsApiKeyModalOpen(false);
   };
 
   useEffect(() => {
@@ -94,11 +109,14 @@ export default function Home() {
                   autosize
                 />
                 <Stack justify="flex-start" gap="xs">
-                  <Button onClick={enhancePrompt} loading={isEnhancing} fullWidth>
+                  <Button onClick={enhancePrompt} loading={isEnhancing} fullWidth disabled={!apiKey}>
                     {isEnhancing ? "Enhancing..." : "Enhance"}
                   </Button>
                   <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline">
                     Undo
+                  </Button>
+                  <Button onClick={() => setIsSettingsOpen(true)} variant="outline">
+                    Settings
                   </Button>
                 </Stack>
               </Stack>
@@ -106,6 +124,31 @@ export default function Home() {
           </Center>
         </Stack>
       </Container>
+
+      <Modal opened={isApiKeyModalOpen} onClose={() => {}} title="Enter GROQ API Key" closeOnClickOutside={false} closeOnEscape={false}>
+        <Stack>
+          <TextInput
+            placeholder="Enter your GROQ API Key"
+            value={tempApiKey}
+            onChange={(e) => setTempApiKey(e.currentTarget.value)}
+          />
+          <Button onClick={handleSaveApiKey} disabled={!tempApiKey}>
+            Save API Key
+          </Button>
+        </Stack>
+      </Modal>
+
+      <Modal opened={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title="Settings">
+        <Stack>
+          <Button onClick={() => {
+            removeApiKey();
+            setIsSettingsOpen(false);
+            setIsApiKeyModalOpen(true);
+          }}>
+            Remove API Key
+          </Button>
+        </Stack>
+      </Modal>
     </ErrorBoundary>
   );
 }
