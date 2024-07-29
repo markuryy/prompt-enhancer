@@ -33,6 +33,8 @@ export default function Home() {
   useEffect(() => {
     if (!apiKey) {
       setIsApiKeyModalOpen(true);
+    } else {
+      setIsApiKeyModalOpen(false);
     }
   }, [apiKey]);
 
