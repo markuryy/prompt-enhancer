@@ -1,10 +1,12 @@
 "use client";
-import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container, Text, Modal, TextInput } from "@mantine/core";
+import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container, Text, Modal, TextInput, Tooltip, Group } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
 import Groq from "groq-sdk";
 import { ErrorBoundary } from "react-error-boundary";
 import { useApiKey } from "@/utils/apiKeyManager";
+import { TbHorse, TbStars, TbArrowBack, TbSettings } from "react-icons/tb";
+import { LuSparkles } from "react-icons/lu";
 
 function ErrorFallback({error}: {error: Error}) {
   return (
@@ -26,12 +28,25 @@ export default function Home() {
   const [tempApiKey, setTempApiKey] = useState("");
   const { apiKey, saveApiKey, removeApiKey } = useApiKey();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isScore9Active, setIsScore9Active] = useState(false);
 
   useEffect(() => {
     if (!apiKey) {
       setIsApiKeyModalOpen(true);
     }
   }, [apiKey]);
+
+  const toggleScore9 = () => {
+    setIsScore9Active(!isScore9Active);
+    setInput(prev => {
+      const score9Text = "score_9, score_8_up, score_7_up, score_6_up, score_5_up, score_4_up, ";
+      if (isScore9Active) {
+        return prev.replace(score9Text, "");
+      } else {
+        return score9Text + prev;
+      }
+    });
+  };
 
   const enhancePrompt = async () => {
     if (!input.trim() || !apiKey) return;
@@ -108,17 +123,33 @@ export default function Home() {
                   minRows={5}
                   autosize
                 />
-                <Stack justify="flex-start" gap="xs">
-                  <Button onClick={enhancePrompt} loading={isEnhancing} fullWidth disabled={!apiKey}>
-                    {isEnhancing ? "Enhancing..." : "Enhance"}
-                  </Button>
-                  <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline">
-                    Undo
-                  </Button>
-                  <Button onClick={() => setIsSettingsOpen(true)} variant="outline">
-                    Settings
-                  </Button>
-                </Stack>
+                <Group justify="center">
+                  <Tooltip label="Enhance">
+                    <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey}>
+                      <LuSparkles />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip label="Undo">
+                    <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline">
+                      <TbArrowBack />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip label="Settings">
+                    <Button onClick={() => setIsSettingsOpen(true)} variant="outline">
+                      <TbSettings />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip label="Toggle Score 9">
+                    <Button onClick={toggleScore9} variant={isScore9Active ? "filled" : "outline"}>
+                      <TbStars />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip label="Pony">
+                    <Button variant="outline">
+                      <TbHorse />
+                    </Button>
+                  </Tooltip>
+                </Group>
               </Stack>
             </Paper>
           </Center>
