@@ -105,22 +105,24 @@ export default function Home() {
             <Title order={1}>AI Prompt Enhancer</Title>
           </Box>
           
+          <Select
+            label="Select Preset"
+            data={Object.keys(presets).map(key => ({ value: key, label: key }))}
+            value={selectedPreset}
+            onChange={(value) => setSelectedPreset(value as string)}
+            style={{ maxWidth: "600px", margin: "0 auto" }}
+          />
+          
           <Center>
-            <Paper withBorder p="md" style={{ width: "100%", maxWidth: "600px" }}>
+            <Paper withBorder p="md" style={{ width: "100%", maxWidth: "800px" }}>
               <Stack gap="md">
-                <Select
-                  label="Select Preset"
-                  data={Object.keys(presets).map(key => ({ value: key, label: key }))}
-                  value={selectedPreset}
-                  onChange={(value) => setSelectedPreset(value as string)}
-                />
                 <Textarea
                   ref={textareaRef}
                   label="Enter your prompt"
                   placeholder="Type your prompt here..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  minRows={5}
+                  minRows={10}
                   autosize
                 />
                 <Group justify="center">
