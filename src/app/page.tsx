@@ -1,5 +1,5 @@
 "use client";
-import { Box, Title, Stack, Textarea, Button, Paper, Center, Container, Text, Modal, TextInput, Tooltip, Group, ActionIcon, Header } from "@mantine/core";
+import { Box, Title, Stack, Textarea, Button, Paper, Center, Container, Text, Modal, TextInput, Tooltip, Group, ActionIcon } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
 import Groq from "groq-sdk";
@@ -104,7 +104,7 @@ export default function Home() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Container size="md">
-        <Header height={60} p="xs">
+        <Box component="header" h={60} p="xs">
           <Group justify="space-between" style={{ height: '100%' }}>
             <Title order={3}>AI Prompt Enhancer</Title>
             <Tooltip label="Settings">
@@ -113,7 +113,7 @@ export default function Home() {
               </ActionIcon>
             </Tooltip>
           </Group>
-        </Header>
+        </Box>
         
         <Stack align="stretch" justify="center" h="calc(100vh - 60px)" fw="md">
           <Group justify="center" align="center">
