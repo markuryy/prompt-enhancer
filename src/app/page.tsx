@@ -1,5 +1,5 @@
 "use client";
-import { Title, Text, Stack, TextInput, Button, Paper, Select, Center, Container } from "@mantine/core";
+import { Box, Title, Text, Stack, TextInput, Button, Paper, Select, Center, Container } from "@mantine/core";
 import { useState, useEffect } from "react";
 import presets from "@/data/presets.json";
 
@@ -54,12 +54,14 @@ export default function Home() {
 
   return (
     <Container size="md">
-      <Stack align="stretch" justify="center" h="100vh" spacing="md">
-        <Title order={1} align="center">AI Prompt Enhancer</Title>
+      <Stack align="stretch" justify="center" h="100vh" fw="md">
+        <Box ta="center">
+          <Title order={1}>AI Prompt Enhancer</Title>
+        </Box>
         
         <Center>
           <Paper withBorder p="md" style={{ width: "100%", maxWidth: "600px" }}>
-            <Stack spacing="md">
+            <Stack gap="md">
               <Select
                 label="Select Preset"
                 data={Object.keys(presets).map(key => ({ value: key, label: key }))}
@@ -72,11 +74,11 @@ export default function Home() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
               />
-              <Text weight={700}>Enhanced Prompt:</Text>
+              <Text fw={700}>Enhanced Prompt:</Text>
               <Paper withBorder p="xs" style={{ minHeight: "100px" }}>
                 <Text>{enhancedInput || "Your enhanced prompt will appear here"}</Text>
               </Paper>
-              <Stack direction="row" spacing="xs">
+              <Stack justify="flex-start" gap="xs">
                 <Button onClick={enhancePrompt} loading={isEnhancing}>
                   {isEnhancing ? "Enhancing..." : "Enhance"}
                 </Button>
