@@ -1,19 +1,17 @@
 "use client";
-import { Box, Title, Text, Stack, TextInput, Button, Paper, Select, Center, Container } from "@mantine/core";
-import { useState, useEffect } from "react";
+import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container } from "@mantine/core";
+import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
 
 export default function Home() {
   const [input, setInput] = useState("");
-  const [enhancedInput, setEnhancedInput] = useState("");
   const [selectedPreset, setSelectedPreset] = useState("SD1.5");
   const [isEnhancing, setIsEnhancing] = useState(false);
-  const [canUndo, setCanUndo] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const enhancePrompt = async () => {
     if (!input.trim()) return;
     setIsEnhancing(true);
-    setCanUndo(true);
 
     try {
       const response = await fetch("/api/enhance", {
@@ -26,31 +24,27 @@ export default function Home() {
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-      let enhancedText = "";
 
       while (true) {
         const { done, value } = await reader!.read();
         if (done) break;
         const chunk = decoder.decode(value);
-        enhancedText += chunk;
-        setEnhancedInput(enhancedText);
+        setInput((prev) => prev + chunk);
       }
     } catch (error) {
       console.error("Error:", error);
-      setEnhancedInput("Sorry, I encountered an error.");
+      setInput((prev) => prev + "\n\nSorry, I encountered an error.");
     } finally {
       setIsEnhancing(false);
     }
   };
 
-  const undoEnhancement = () => {
-    setEnhancedInput(input);
-    setCanUndo(false);
-  };
-
   useEffect(() => {
-    setCanUndo(enhancedInput !== input && enhancedInput !== "");
-  }, [input, enhancedInput]);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [input]);
 
   return (
     <Container size="md">
@@ -68,24 +62,18 @@ export default function Home() {
                 value={selectedPreset}
                 onChange={(value) => setSelectedPreset(value as string)}
               />
-              <TextInput
+              <Textarea
+                ref={textareaRef}
                 label="Enter your prompt"
                 placeholder="Type your prompt here..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                minRows={5}
+                autosize
               />
-              <Text fw={700}>Enhanced Prompt:</Text>
-              <Paper withBorder p="xs" style={{ minHeight: "100px" }}>
-                <Text>{enhancedInput || "Your enhanced prompt will appear here"}</Text>
-              </Paper>
-              <Stack justify="flex-start" gap="xs">
-                <Button onClick={enhancePrompt} loading={isEnhancing}>
-                  {isEnhancing ? "Enhancing..." : "Enhance"}
-                </Button>
-                <Button onClick={undoEnhancement} disabled={!canUndo}>
-                  Undo
-                </Button>
-              </Stack>
+              <Button onClick={enhancePrompt} loading={isEnhancing} fullWidth>
+                {isEnhancing ? "Enhancing..." : "Enhance"}
+              </Button>
             </Stack>
           </Paper>
         </Center>
