@@ -1,12 +1,23 @@
 "use client";
-import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container } from "@mantine/core";
+import { Box, Title, Stack, Textarea, Button, Paper, Select, Center, Container, Text } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
 import Groq from "groq-sdk";
+import { ErrorBoundary } from "react-error-boundary";
 
 const groq = new Groq();
 
+function ErrorFallback({error}: {error: Error}) {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre>{error.message}</pre>
+    </div>
+  )
+}
+
 export default function Home() {
+  console.log("Rendering Home component");
   const [input, setInput] = useState("");
   const [previousInput, setPreviousInput] = useState("");
   const [selectedPreset, setSelectedPreset] = useState("SD1.5");
@@ -57,42 +68,44 @@ export default function Home() {
   }, [input]);
 
   return (
-    <Container size="md">
-      <Stack align="stretch" justify="center" h="100vh" fw="md">
-        <Box ta="center">
-          <Title order={1}>AI Prompt Enhancer</Title>
-        </Box>
-        
-        <Center>
-          <Paper withBorder p="md" style={{ width: "100%", maxWidth: "600px" }}>
-            <Stack gap="md">
-              <Select
-                label="Select Preset"
-                data={Object.keys(presets).map(key => ({ value: key, label: key }))}
-                value={selectedPreset}
-                onChange={(value) => setSelectedPreset(value as string)}
-              />
-              <Textarea
-                ref={textareaRef}
-                label="Enter your prompt"
-                placeholder="Type your prompt here..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                minRows={5}
-                autosize
-              />
-              <Stack justify="flex-start" gap="xs">
-                <Button onClick={enhancePrompt} loading={isEnhancing} fullWidth>
-                  {isEnhancing ? "Enhancing..." : "Enhance"}
-                </Button>
-                <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline">
-                  Undo
-                </Button>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <Container size="md">
+        <Stack align="stretch" justify="center" h="100vh" fw="md">
+          <Box ta="center">
+            <Title order={1}>AI Prompt Enhancer</Title>
+          </Box>
+          
+          <Center>
+            <Paper withBorder p="md" style={{ width: "100%", maxWidth: "600px" }}>
+              <Stack gap="md">
+                <Select
+                  label="Select Preset"
+                  data={Object.keys(presets).map(key => ({ value: key, label: key }))}
+                  value={selectedPreset}
+                  onChange={(value) => setSelectedPreset(value as string)}
+                />
+                <Textarea
+                  ref={textareaRef}
+                  label="Enter your prompt"
+                  placeholder="Type your prompt here..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  minRows={5}
+                  autosize
+                />
+                <Stack justify="flex-start" gap="xs">
+                  <Button onClick={enhancePrompt} loading={isEnhancing} fullWidth>
+                    {isEnhancing ? "Enhancing..." : "Enhance"}
+                  </Button>
+                  <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline">
+                    Undo
+                  </Button>
+                </Stack>
               </Stack>
-            </Stack>
-          </Paper>
-        </Center>
-      </Stack>
-    </Container>
+            </Paper>
+          </Center>
+        </Stack>
+      </Container>
+    </ErrorBoundary>
   );
 }
