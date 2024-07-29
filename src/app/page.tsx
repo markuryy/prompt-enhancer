@@ -81,7 +81,7 @@ export default function Home() {
                 minRows={5}
                 autosize
               />
-              <Stack direction="row" spacing="xs">
+              <Stack justify="flex-start" gap="xs">
                 <Button onClick={enhancePrompt} loading={isEnhancing} fullWidth>
                   {isEnhancing ? "Enhancing..." : "Enhance"}
                 </Button>
