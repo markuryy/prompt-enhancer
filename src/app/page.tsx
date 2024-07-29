@@ -135,17 +135,19 @@ export default function Home() {
                   autosize
                 />
                 <Group justify="center">
-                  <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey} size="lg" leftSection={<LuSparkles />}>
+                  
+                  
+                  <Tooltip label="Toggle Score 9">
+                    <Button onClick={toggleScore9} variant={isScore9Active ? "filled" : "outline"}>
+                      <TbHorse />
+                    </Button>
+                  </Tooltip>
+                  <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey} leftSection={<LuSparkles />}>
                     Enhance
                   </Button>
                   <Tooltip label="Undo">
                     <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline">
                       <TbArrowBack />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip label="Toggle Score 9">
-                    <Button onClick={toggleScore9} variant={isScore9Active ? "filled" : "outline"}>
-                      <TbHorse />
                     </Button>
                   </Tooltip>
                 </Group>
