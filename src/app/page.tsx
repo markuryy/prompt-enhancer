@@ -2,6 +2,7 @@
 import { Box, Title, Stack, Textarea, Button, Paper, Center, Container, Text, Modal, TextInput, Tooltip, Group, ActionIcon } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
+import { usePresets } from "@/utils/presetManager";
 import Groq from "groq-sdk";
 import { ErrorBoundary } from "react-error-boundary";
 import { useApiKey } from "@/utils/apiKeyManager";
@@ -21,7 +22,7 @@ export default function Home() {
   console.log("Rendering Home component");
   const [input, setInput] = useState("");
   const [previousInput, setPreviousInput] = useState("");
-  const [selectedPreset, setSelectedPreset] = useState("SD1.5");
+  const { presetNames, selectedPreset, setSelectedPreset } = usePresets();
   const [isEnhancing, setIsEnhancing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
@@ -104,18 +105,22 @@ export default function Home() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Container size="md">
-        <Box component="header" h={60} p="xs">
-          <Group justify="space-between" style={{ height: '100%' }}>
+        <Box component="header" h={60} p="xs" style={{ position: 'relative' }}>
+          <Group justify="center" style={{ height: '100%' }}>
             <Title order={3}>AI Prompt Enhancer</Title>
-            <Tooltip label="Settings">
-              <ActionIcon onClick={() => setIsSettingsOpen(true)} variant="subtle">
-                <TbSettings size="1.2rem" />
-              </ActionIcon>
-            </Tooltip>
           </Group>
+          <Tooltip label="Settings" position="bottom-end">
+            <ActionIcon 
+              onClick={() => setIsSettingsOpen(true)} 
+              variant="subtle"
+              style={{ position: 'absolute', top: '50%', right: '1rem', transform: 'translateY(-50%)' }}
+            >
+              <TbSettings size="1.2rem" />
+            </ActionIcon>
+          </Tooltip>
         </Box>
         
-        <Stack align="stretch" justify="center" h="calc(100vh - 60px)" fw="md">
+        <Stack align="stretch" justify="center" h="calc(100vh - 120px)" fw="md">
           <Group justify="center" align="center">
             <Text>Optimize prompt for</Text>
             <Button onClick={() => setIsPresetModalOpen(true)} rightSection={<TbChevronDown />} variant="subtle">
@@ -183,7 +188,7 @@ export default function Home() {
 
       <Modal opened={isPresetModalOpen} onClose={() => setIsPresetModalOpen(false)} title="Select Preset">
         <Stack>
-          {Object.keys(presets).map(key => (
+          {presetNames.map(key => (
             <Button
               key={key}
               onClick={() => {
