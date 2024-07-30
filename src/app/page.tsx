@@ -5,7 +5,7 @@ import presets from "@/data/presets.json";
 import { usePresets } from "@/utils/presetManager";
 import { ErrorBoundary } from "react-error-boundary";
 import { useApiKey } from "@/utils/apiKeyManager";
-import { TbHorse, TbArrowBack, TbSettings, TbChevronDown, TbKey, TbEraser } from "react-icons/tb";
+import { TbHorse, TbArrowBack, TbSettings, TbChevronDown, TbKey, TbX } from "react-icons/tb";
 import { LuSparkles } from "react-icons/lu";
 import { useMediaQuery } from '@mantine/hooks';
 
@@ -158,19 +158,26 @@ export default function Home() {
                 />
                 <Transition mounted={input.length > 0} transition="fade" duration={400} timingFunction="ease">
                   {(styles) => (
-                    <ActionIcon
-                      style={{
-                        ...styles,
-                        position: 'absolute',
-                        top: '10px',
-                        right: '10px',
-                        backgroundColor: theme.colors.gray[2],
-                        color: theme.colors.gray[7],
-                      }}
-                      onClick={clearPrompt}
-                    >
-                      <TbEraser size="1rem" />
-                    </ActionIcon>
+                    <Tooltip label="Clear prompt" position="left">
+                      <ActionIcon
+                        style={{
+                          ...styles,
+                          position: 'absolute',
+                          top: '5px',
+                          right: '5px',
+                          backgroundColor: 'transparent',
+                          color: theme.colors.gray[6],
+                          opacity: 0.6,
+                          transition: 'opacity 0.2s',
+                        }}
+                        onClick={clearPrompt}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                        size="sm"
+                      >
+                        <TbX size="0.8rem" />
+                      </ActionIcon>
+                    </Tooltip>
                   )}
                 </Transition>
               </Box>
