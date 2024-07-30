@@ -24,7 +24,7 @@ This is a Next.js project that uses the GROQ API to enhance AI prompts. It featu
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/ai-prompt-enhancer.git
+   git clone https://github.com/markuryy/prompt-enhancer.git
    cd ai-prompt-enhancer
    ```
 
