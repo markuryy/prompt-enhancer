@@ -7,8 +7,8 @@ import { AppLayout } from '../components/layout/AppLayout';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "New Project",
-  description: "A Markury Project",
+  title: "AI Prompt Enhancer",
+  description: "Enhance your AI prompts with GROQ API",
 };
 
 export default function RootLayout({
