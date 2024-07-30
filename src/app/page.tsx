@@ -203,7 +203,6 @@ export default function Home() {
           <Button
             onClick={() => {
               setSelectedPreset("Custom");
-              setIsPresetModalOpen(false);
             }}
             variant={selectedPreset === "Custom" ? "filled" : "light"}
           >
