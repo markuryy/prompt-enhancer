@@ -3,7 +3,6 @@ import { Box, Title, Stack, Textarea, Button, Paper, Center, Container, Text, Mo
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
 import { usePresets } from "@/utils/presetManager";
-import Groq from "groq-sdk";
 import { ErrorBoundary } from "react-error-boundary";
 import { useApiKey } from "@/utils/apiKeyManager";
 import { TbHorse, TbArrowBack, TbSettings, TbChevronDown } from "react-icons/tb";
@@ -60,23 +59,24 @@ export default function Home() {
     setInput("");
 
     try {
-      const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
-      const stream = await groq.chat.completions.create({
-        messages: [
-          { role: "system", content: selectedPreset === "Custom" ? customPreset : presets[selectedPreset as keyof typeof presets] },
-          { role: "user", content: input },
-        ],
-        model: "llama3-8b-8192",
-        temperature: 0.5,
-        max_tokens: 1024,
-        top_p: 1,
-        stream: true,
+      const response = await fetch('/api/enhance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          input,
+          selectedPreset: selectedPreset === "Custom" ? customPreset : presets[selectedPreset as keyof typeof presets],
+          apiKey,
+        }),
       });
 
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content || "";
-        setInput((prev) => prev + content);
+      if (!response.ok) {
+        throw new Error('API request failed');
       }
+
+      const data = await response.json();
+      setInput(data.enhancedPrompt);
     } catch (error) {
       console.error("Error:", error);
       setInput("Sorry, I encountered an error.");
