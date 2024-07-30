@@ -150,7 +150,7 @@ export default function Home() {
                     <TbHorse />
                   </Button>
                 </Tooltip>
-                <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey} leftSection={<LuSparkles />} size={isMobile ? 'sm' : 'lg'}>
+                <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey} leftSection={<LuSparkles />} size={isMobile ? 'sm' : 'md'}>
                   Enhance
                 </Button>
                 <Tooltip label="Undo">
