@@ -1,11 +1,11 @@
 "use client";
-import { Box, Title, Stack, Textarea, Button, Paper, Container, Text, Modal, TextInput, Tooltip, Group, ActionIcon, useMantineTheme } from "@mantine/core";
+import { Box, Title, Stack, Textarea, Button, Paper, Container, Text, Modal, TextInput, Tooltip, Group, ActionIcon, useMantineTheme, Transition } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
 import { usePresets } from "@/utils/presetManager";
 import { ErrorBoundary } from "react-error-boundary";
 import { useApiKey } from "@/utils/apiKeyManager";
-import { TbHorse, TbArrowBack, TbSettings, TbChevronDown, TbKey } from "react-icons/tb";
+import { TbHorse, TbArrowBack, TbSettings, TbChevronDown, TbKey, TbEraser } from "react-icons/tb";
 import { LuSparkles } from "react-icons/lu";
 import { useMediaQuery } from '@mantine/hooks';
 
@@ -22,6 +22,7 @@ export default function Home() {
   console.log("Rendering Home component");
   const [input, setInput] = useState("");
   const [previousInput, setPreviousInput] = useState("");
+  const [clearedInput, setClearedInput] = useState("");
   const { presetNames, selectedPreset, setSelectedPreset } = usePresets();
   const [isEnhancing, setIsEnhancing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -94,6 +95,16 @@ export default function Home() {
     setPreviousInput("");
   };
 
+  const clearPrompt = () => {
+    setClearedInput(input);
+    setInput("");
+  };
+
+  const undoClear = () => {
+    setInput(clearedInput);
+    setClearedInput("");
+  };
+
   const handleSaveApiKey = () => {
     saveApiKey(tempApiKey);
     setIsApiKeyModalOpen(false);
@@ -134,16 +145,35 @@ export default function Home() {
           
           <Paper withBorder p={isMobile ? 'xs' : 'md'} style={{ width: "100%", maxWidth: "1000px", margin: "0 auto" }}>
             <Stack gap={isMobile ? 'xs' : 'md'}>
-              <Textarea
-                ref={textareaRef}
-                placeholder="Your prompt..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                minRows={5}
-                resize="vertical"
-                autosize
-                style={{ width: isMobile ? "100%" : "40vh" }}
-              />
+              <Box style={{ position: 'relative' }}>
+                <Textarea
+                  ref={textareaRef}
+                  placeholder="Your prompt..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  minRows={5}
+                  resize="vertical"
+                  autosize
+                  style={{ width: isMobile ? "100%" : "40vh" }}
+                />
+                <Transition mounted={input.length > 0} transition="fade" duration={400} timingFunction="ease">
+                  {(styles) => (
+                    <ActionIcon
+                      style={{
+                        ...styles,
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        backgroundColor: theme.colors.gray[2],
+                        color: theme.colors.gray[7],
+                      }}
+                      onClick={clearPrompt}
+                    >
+                      <TbEraser size="1rem" />
+                    </ActionIcon>
+                  )}
+                </Transition>
+              </Box>
               <Group justify="center" wrap="wrap">
                 <Tooltip label="Toggle Score 9">
                   <Button onClick={toggleScore9} variant={isScore9Active ? "filled" : "outline"} size={isMobile ? 'sm' : 'md'}>
@@ -154,7 +184,12 @@ export default function Home() {
                   Enhance
                 </Button>
                 <Tooltip label="Undo">
-                  <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline" size={isMobile ? 'sm' : 'md'}>
+                  <Button 
+                    onClick={clearedInput ? undoClear : undoEnhancement} 
+                    disabled={!previousInput && !clearedInput} 
+                    variant="outline" 
+                    size={isMobile ? 'sm' : 'md'}
+                  >
                     <TbArrowBack />
                   </Button>
                 </Tooltip>
