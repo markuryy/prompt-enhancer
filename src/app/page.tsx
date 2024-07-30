@@ -216,6 +216,10 @@ export default function Home() {
           <Button onClick={handleSaveApiKey} disabled={!tempApiKey}>
             Save API Key
           </Button>
+          <Text ta="center" size="xs">
+            Don't have an API Key? Get one{" "}
+            <a style={{ color: "#74C0FC" }} href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">here</a>
+          </Text>
         </Stack>
       </Modal>
 
