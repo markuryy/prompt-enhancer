@@ -1,18 +1,19 @@
 "use client";
-import { Box, Title, Stack, Textarea, Button, Paper, Center, Container, Text, Modal, TextInput, Tooltip, Group, ActionIcon } from "@mantine/core";
+import { Box, Title, Stack, Textarea, Button, Paper, Container, Text, Modal, TextInput, Tooltip, Group, ActionIcon, useMantineTheme } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import presets from "@/data/presets.json";
 import { usePresets } from "@/utils/presetManager";
 import { ErrorBoundary } from "react-error-boundary";
 import { useApiKey } from "@/utils/apiKeyManager";
-import { TbHorse, TbArrowBack, TbSettings, TbChevronDown } from "react-icons/tb";
+import { TbHorse, TbArrowBack, TbSettings, TbChevronDown, TbKey } from "react-icons/tb";
 import { LuSparkles } from "react-icons/lu";
+import { useMediaQuery } from '@mantine/hooks';
 
 function ErrorFallback({error}: {error: Error}) {
   return (
     <div role="alert">
       <p>Something went wrong:</p>
-      <pre>{error.message}</pre>
+      <pre style={{ wordBreak: 'break-word' }}>{error.message}</pre>
     </div>
   )
 }
@@ -31,6 +32,9 @@ export default function Home() {
   const [isScore9Active, setIsScore9Active] = useState(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
   const [customPreset, setCustomPreset] = useState("");
+
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   useEffect(() => {
     if (!apiKey) {
@@ -104,64 +108,63 @@ export default function Home() {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <Container size="md">
+      <Container size="md" px={isMobile ? 'xs' : 'md'}>
         <Box component="header" h={60} p="xs" style={{ position: 'relative' }}>
           <Group justify="center" style={{ height: '100%' }}>
-            <Title order={3}>AI Prompt Enhancer</Title>
+            <Title order={3} size={isMobile ? 'h4' : 'h3'}>AI Prompt Enhancer</Title>
           </Group>
-          <Tooltip label="Settings" position="bottom-end">
+          <Tooltip label="API Key" position="bottom-end">
             <ActionIcon 
               onClick={() => setIsSettingsOpen(true)} 
               variant="subtle"
               style={{ position: 'absolute', top: '50%', right: '1rem', transform: 'translateY(-50%)' }}
             >
-              <TbSettings size="1.2rem" />
+              <TbKey size="1.2rem" />
             </ActionIcon>
           </Tooltip>
         </Box>
         
-        <Stack align="stretch" justify="center" h="calc(100vh - 120px)" fw="md">
-          <Group justify="center" align="center">
+        <Stack align="stretch" justify="flex-start" h={isMobile ? "auto" : "calc(100vh - 120px)"} fw="md" gap={isMobile ? 'sm' : 'md'}>
+          <Group justify="center" align="center" wrap="wrap">
             <Text>Optimize prompt for</Text>
-            <Button onClick={() => setIsPresetModalOpen(true)} rightSection={<TbChevronDown />} variant="subtle">
+            <Button onClick={() => setIsPresetModalOpen(true)} rightSection={<TbChevronDown />} variant="subtle" size={isMobile ? 'compact-sm' : 'compact-md'}>
               {selectedPreset}
             </Button>
           </Group>
           
-          <Center>
-            <Paper withBorder p="md" style={{ width: "100%", maxWidth: "800px" }}>
-              <Stack gap="md">
-                <Textarea
-                  ref={textareaRef}
-                  label="Enter your prompt"
-                  placeholder="Type your prompt here..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  minRows={10}
-                  autosize
-                />
-                <Group justify="center">
-                  <Tooltip label="Toggle Score 9">
-                    <Button onClick={toggleScore9} variant={isScore9Active ? "filled" : "outline"}>
-                      <TbHorse />
-                    </Button>
-                  </Tooltip>
-                  <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey} leftSection={<LuSparkles />} size="lg">
-                    Enhance
+          <Paper withBorder p={isMobile ? 'xs' : 'md'} style={{ width: "100%", maxWidth: "1000px", margin: "0 auto" }}>
+            <Stack gap={isMobile ? 'xs' : 'md'}>
+              <Textarea
+                ref={textareaRef}
+                placeholder="Your prompt..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                minRows={5}
+                resize="vertical"
+                autosize
+                style={{ width: isMobile ? "100%" : "40vh" }}
+              />
+              <Group justify="center" wrap="wrap">
+                <Tooltip label="Toggle Score 9">
+                  <Button onClick={toggleScore9} variant={isScore9Active ? "filled" : "outline"} size={isMobile ? 'sm' : 'md'}>
+                    <TbHorse />
                   </Button>
-                  <Tooltip label="Undo">
-                    <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline">
-                      <TbArrowBack />
-                    </Button>
-                  </Tooltip>
-                </Group>
-              </Stack>
-            </Paper>
-          </Center>
+                </Tooltip>
+                <Button onClick={enhancePrompt} loading={isEnhancing} disabled={!apiKey} leftSection={<LuSparkles />} size={isMobile ? 'sm' : 'lg'}>
+                  Enhance
+                </Button>
+                <Tooltip label="Undo">
+                  <Button onClick={undoEnhancement} disabled={!previousInput} variant="outline" size={isMobile ? 'sm' : 'md'}>
+                    <TbArrowBack />
+                  </Button>
+                </Tooltip>
+              </Group>
+            </Stack>
+          </Paper>
         </Stack>
       </Container>
 
-      <Modal opened={isApiKeyModalOpen} onClose={() => {}} title="Enter GROQ API Key" closeOnClickOutside={false} closeOnEscape={false}>
+      <Modal opened={isApiKeyModalOpen} onClose={() => {}} title="Enter GROQ API Key" closeOnClickOutside={false} closeOnEscape={false} size={isMobile ? 'sm' : 'md'}>
         <Stack>
           <TextInput
             placeholder="Enter your GROQ API Key"
@@ -174,7 +177,7 @@ export default function Home() {
         </Stack>
       </Modal>
 
-      <Modal opened={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title="Settings">
+      <Modal opened={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title="Settings" size={isMobile ? 'sm' : 'md'}>
         <Stack>
           <Button onClick={() => {
             removeApiKey();
@@ -186,7 +189,7 @@ export default function Home() {
         </Stack>
       </Modal>
 
-      <Modal opened={isPresetModalOpen} onClose={() => setIsPresetModalOpen(false)} title="Select Preset">
+      <Modal opened={isPresetModalOpen} onClose={() => setIsPresetModalOpen(false)} title="Select Preset" size={isMobile ? 'sm' : 'md'}>
         <Stack>
           {presetNames.map(key => (
             <Button
@@ -196,6 +199,7 @@ export default function Home() {
                 setIsPresetModalOpen(false);
               }}
               variant={selectedPreset === key ? "filled" : "light"}
+              size={isMobile ? 'sm' : 'md'}
             >
               {key}
             </Button>
@@ -205,6 +209,7 @@ export default function Home() {
               setSelectedPreset("Custom");
             }}
             variant={selectedPreset === "Custom" ? "filled" : "light"}
+            size={isMobile ? 'sm' : 'md'}
           >
             Custom
           </Button>
